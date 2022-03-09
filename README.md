@@ -83,7 +83,9 @@ Usage: `python3.8 accuracyCalculator.py benchmarkingParameters.tsv flopp nphase 
 * Calculates accuracy metrics of phasing results obtained by running phaseToolRunner.py and outputs them to a file and to stdout.
 
 ### Example script
-With the example benchmarkingParameters.tsv file, you can run a full benchmarking pipeline using 4 strains to generate a virtual 2n, 3n and 4n, at coverage level 20X/haplotype, and randomly subset their variants to obtain VCF files at 1%, 0.5%, 0.1% and 0.05% heterozygosity, with and without indels. In total it generates 3 ploidies at 4 heterozygosity levels each, with and without indels, for a total of 3\*4\*2=24 virtual polyploids which are all phased by flopp, nphase and whatshap polyphase and their results analyzed in comparison with the known ground truth.
+With the example benchmarkingParameters.tsv file, you can run a full benchmarking pipeline using 4 strains to generate a virtual 2n, 3n and 4n, at coverage levels 10X/haplotype and 20X/haplotype, and randomly subset their variants to obtain VCF files at 1%, 0.5%, 0.1% and 0.05% heterozygosity, with and without indels. In total it generates 3 ploidies at 2 coverage levels and 4 heterozygosity levels each, with and without indels, for a total of 3\*2\*4\*2=48 virtual polyploids which are all phased by flopp, nphase and whatshap polyphase and their results analyzed in comparison with the known ground truth.
+
+Please note that this can take a few days and over 100GB of hard drive space to run fully. You can modify the benchmarkingParameters.tsv file to reduce the number of tests to perform to test run the phasing toolkit faster and more efficiently. We provide a very complete benchmarking test here as an example to show the range of available options.
 
 >python3.8 downloadData.py benchmarkingParameters.tsv  
 >python3.8 processReads.py benchmarkingParameters.tsv groundTruth  
