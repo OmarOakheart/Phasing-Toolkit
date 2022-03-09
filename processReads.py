@@ -366,10 +366,10 @@ if __name__=="__main__":
         pool = Pool()
 
         results=[]
-        
+
         for strainList in benchmarkParameters["strainLists"]:
             strainName="_".join(strainList)
-            estimatedPloidy=len(strainList)
+            estimatedPloidy=str(len(strainList))
             result=pool.apply_async(runVariantCalling,[strainName,mappedShortReads,variantCalledShortReads,referenceFilePath,estimatedPloidy])
             results.append(result)
 
