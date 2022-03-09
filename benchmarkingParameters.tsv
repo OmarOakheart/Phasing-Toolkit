@@ -1,0 +1,10 @@
+mainPath	/home/oabousaada/goldStandard/
+longReads	ACA:ERR4352153	BMB:ERR4352154	CCN:ERR4352155	CRL:ERR4352156
+longReadMethod	ont
+shortReads	ACA:ERR1309429	BMB:ERR1308675	CCN:ERR1308732	CRL:ERR1308952
+coverages	20	10
+heterozygosityRates	0.05	0.1	0.5	1
+reference	taxID:559292	group:fungi	speciesName:sCerevisiae
+strainLists	BMB,CCN	ACA,BMB,CCN	ACA,BMB,CCN,CRL
+genomeSize	12500000
+threads	8
