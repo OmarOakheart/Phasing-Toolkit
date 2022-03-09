@@ -256,5 +256,5 @@ if __name__=="__main__":
 
     for strains in benchmarkParameters["strainLists"]:
         for coverage in benchmarkParameters["coverages"]:
-            hybridGenerator(strains,benchmarkParameters,coverage)
+            hybridGenerator(strains,benchmarkParameters,int(coverage))
 
