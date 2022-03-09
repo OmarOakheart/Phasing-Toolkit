@@ -344,24 +344,24 @@ if __name__=="__main__":
         print("All ground truth reads processed")
 
     if runningMode == "virtualHybrids" and "longReads" in benchmarkParameters.keys():
-        longReadStrains = list(benchmarkParameters["longReads"].keys())
-        for strainName in longReadStrains:
-            longReadName=benchmarkParameters["longReads"][strainName]
-            longReadFile=longReadPath+longReadName+".fastq.gz"
-            outputLog,systemMessage=longReadMapping(strainName,longReadFile,referenceFilePath,mappedLongReads,splitReadFlag,"ont",threads)
-            print(systemMessage)
-            updateLog(fullLogPath,outputLog)
+        for strainList in benchmarkParameters["strainLists"]:
+            for coverageLevel in benchmarkParameters["coverages"]:
+                longReadName="_".join(strainList)+"_"+coverageLevel+"X"
+                longReadFile=longReadPath+longReadName+".fastq.gz"
+                outputLog,systemMessage=longReadMapping(longReadName,longReadFile,referenceFilePath,mappedLongReads,splitReadFlag,"ont",threads)
+                print(systemMessage)
+                updateLog(fullLogPath,outputLog)
 
     #Map short reads
     if runningMode == "virtualHybrids" and "shortReads" in benchmarkParameters.keys():
-        shortReadStrains = list(benchmarkParameters["shortReads"].keys())
-        for strainName in shortReadStrains:
-            shortReadName = benchmarkParameters["shortReads"][strainName]
-            shortReadFile_R1 = shortReadPath + shortReadName + "_1.fastq.gz"
-            shortReadFile_R2 = shortReadPath + shortReadName + "_2.fastq.gz"
-            outputLog,systemMessage=shortReadMapping(strainName,shortReadFile_R1,shortReadFile_R2,referenceFilePath,mappedShortReads,threads)
-            print(systemMessage)
-            updateLog(fullLogPath,outputLog)
+        for strainList in benchmarkParameters["strainLists"]:
+            for coverageLevel in benchmarkParameters["coverages"]:
+                shortReadName="_".join(strainList)+"_"+coverageLevel+"X"
+                shortReadFile_R1 = shortReadPath + shortReadName + "_1.fastq.gz"
+                shortReadFile_R2 = shortReadPath + shortReadName + "_2.fastq.gz"
+                outputLog,systemMessage=shortReadMapping(shortReadName,shortReadFile_R1,shortReadFile_R2,referenceFilePath,mappedShortReads,threads)
+                print(systemMessage)
+                updateLog(fullLogPath,outputLog)
 
         pool = Pool()
 
