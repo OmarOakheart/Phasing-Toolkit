@@ -368,10 +368,12 @@ if __name__=="__main__":
         results=[]
 
         for strainList in benchmarkParameters["strainLists"]:
-            strainName="_".join(strainList)
-            estimatedPloidy=str(len(strainList))
-            result=pool.apply_async(runVariantCalling,[strainName,mappedShortReads,variantCalledShortReads,referenceFilePath,estimatedPloidy])
-            results.append(result)
+            for strainList in benchmarkParameters["strainLists"]:
+                for coverageLevel in benchmarkParameters["coverages"]:
+                    shortReadName = "_".join(strainList) + "_" + coverageLevel + "X"
+                    estimatedPloidy=str(len(strainList))
+                    result=pool.apply_async(runVariantCalling,[shortReadName,mappedShortReads,variantCalledShortReads,referenceFilePath,estimatedPloidy])
+                    results.append(result)
 
         for result in results:
             result.get()
