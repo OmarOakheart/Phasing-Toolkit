@@ -383,9 +383,8 @@ if __name__=="__main__":
         for strainList in benchmarkParameters["strainLists"]:
             for coverageLevel in benchmarkParameters["coverages"]:
                 strainName = "_".join(strainList)+"_"+coverageLevel+"X"
-                estimatedPloidy = str(len(strainList))
                 for subsamplingSize in benchmarkParameters["heterozygosityRates"]:
-                    VCFFile=os.path.join(variantCalledShortReads,strainName+"_"+estimatedPloidy+"n.vcf")
+                    VCFFile=os.path.join(variantCalledShortReads,strainName+".vcf")
                     subsampleVCF(VCFFile,subsamplingSize,True,referenceFilePath,benchmarkParameters["genomeSize"])
                     subsampleVCF(VCFFile,subsamplingSize,False,referenceFilePath,benchmarkParameters["genomeSize"])
 
