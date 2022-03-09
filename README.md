@@ -95,7 +95,7 @@ With the example benchmarkingParameters.tsv file, you can run a full benchmarkin
 ### Parameter file in detail
 ``benchmarkingParameters.tsv``
 
-This file contains all of the information needed to share a full benchmark with anyone else.
+This file contains all of the information needed to share a full benchmark with anyone else. Here we describe it line by line:
 
 Output folder which will be used to store all of the data we're going to download and generate  
 >mainPath&emsp;/path/to/outputFolder/
