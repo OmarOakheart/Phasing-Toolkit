@@ -299,10 +299,9 @@ if __name__ == "__main__":
         for strainList in benchmarkParameters["strainLists"]:
             strainName="_".join(strainList)
             ploidy = str(len(strainList))
-            ploidyText=ploidy+"n_"
             for coverage in benchmarkParameters["coverages"]:
                 for heterozygosityRate in benchmarkParameters["heterozygosityRates"]:
-                    testName = strainName + "_" + str(coverage) + "X_" + ploidyText+heterozygosityRate
+                    testName = strainName + "_" + str(coverage) + "X_"+heterozygosityRate
                     vcfFile=variantCalledShortReads+testName+".SNPs.vcf"
                     mappedLR = mappedLongReads + strainName + "_" + str(coverage) + "X.sorted.bam"
                     outPath = floppPath+"flopp_"+testName+".SNPs.vcf"
@@ -318,10 +317,9 @@ if __name__ == "__main__":
         for strainList in benchmarkParameters["strainLists"]:
             strainName="_".join(strainList)
             ploidy = str(len(strainList))
-            ploidyText=ploidy+"n_"
             for coverage in benchmarkParameters["coverages"]:
                 for heterozygosityRate in benchmarkParameters["heterozygosityRates"]:
-                    testName = strainName + "_" + str(coverage) + "X_" + ploidyText + heterozygosityRate
+                    testName = strainName + "_" + str(coverage) + "X_" + heterozygosityRate
                     vcfFile=variantCalledShortReads+testName+".SNPs.vcf"
                     mappedLR = mappedLongReads + strainName + "_" + str(coverage) + "X.sorted.bam"
                     outPath = whatsHapPolyphasePath+"WHP_fixed_"+testName+".SNPs.vcf"
@@ -342,10 +340,9 @@ if __name__ == "__main__":
         for strainList in benchmarkParameters["strainLists"]:
             strainName="_".join(strainList)
             ploidy = str(len(strainList))
-            ploidyText=ploidy+"n_"
             for coverage in benchmarkParameters["coverages"]:
                 for heterozygosityRate in benchmarkParameters["heterozygosityRates"]:
-                    testName=strainName+"_"+str(coverage)+"X_"+ploidyText+heterozygosityRate
+                    testName=strainName+"_"+str(coverage)+"X_"+heterozygosityRate
                     longReadFile=hybridLongReads+strainName+"_"+str(coverage)+"X.fastq.gz"
                     vcfFile=variantCalledShortReads+testName+".SNPs.vcf"
                     mappedLR=mappedLongReads+strainName+"_"+str(coverage)+"X.sorted.sam"
