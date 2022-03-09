@@ -196,7 +196,7 @@ def mergeReads(outputFileName,filesToMerge):
 
 def hybridGenerator(strains,strainDictionary,coverage):
     hybridName="_".join(strains)+"_"+str(coverage)+"X"
-    genomeSize=strainDictionary["genomeSize"]
+    genomeSize=int(strainDictionary["genomeSize"])
     shortReadsToMerge_R1=[]
     shortReadsToMerge_R2=[]
     longReadsToMerge=[]
