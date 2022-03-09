@@ -343,16 +343,10 @@ if __name__=="__main__":
     if runningMode == "groundTruth":
         print("All ground truth reads processed")
 
-    strainCouplings=[("BMB_CCN_20X","2"),("ACA_BMB_CCN_20X","3"),("ACA_BMB_CCN_CRL_20X","4")]
-
-    strainDictionary={"longReads":{"BMB_CCN_20X":"BMB_CCN_20X","ACA_BMB_CCN_20X":"ACA_BMB_CCN_20X","ACA_BMB_CCN_CRL_20X":"ACA_BMB_CCN_CRL_20X"},
-                      "shortReads":{"BMB_CCN_20X":"BMB_CCN_20X","ACA_BMB_CCN_20X":"ACA_BMB_CCN_20X","ACA_BMB_CCN_CRL_20X":"ACA_BMB_CCN_CRL_20X"},
-                      "genomeSize":12500000,"heterozygosityRates":["0.05","0.1","0.5","1"]}
-
     if runningMode == "virtualHybrids" and "longReads" in benchmarkParameters.keys():
         longReadStrains = list(benchmarkParameters["longReads"].keys())
         for strainName in longReadStrains:
-            longReadName=strainDictionary["longReads"][strainName]
+            longReadName=benchmarkParameters["longReads"][strainName]
             longReadFile=longReadPath+longReadName+".fastq.gz"
             outputLog,systemMessage=longReadMapping(strainName,longReadFile,referenceFilePath,mappedLongReads,splitReadFlag,"ont",threads)
             print(systemMessage)
@@ -362,7 +356,7 @@ if __name__=="__main__":
     if runningMode == "virtualHybrids" and "shortReads" in benchmarkParameters.keys():
         shortReadStrains = list(benchmarkParameters["shortReads"].keys())
         for strainName in shortReadStrains:
-            shortReadName = strainDictionary["shortReads"][strainName]
+            shortReadName = benchmarkParameters["shortReads"][strainName]
             shortReadFile_R1 = shortReadPath + shortReadName + "_1.fastq.gz"
             shortReadFile_R2 = shortReadPath + shortReadName + "_2.fastq.gz"
             outputLog,systemMessage=shortReadMapping(strainName,shortReadFile_R1,shortReadFile_R2,referenceFilePath,mappedShortReads,threads)
@@ -372,7 +366,10 @@ if __name__=="__main__":
         pool = Pool()
 
         results=[]
-        for strainName,estimatedPloidy in strainCouplings:
+        
+        for strainList in benchmarkParameters["strainLists"]:
+            strainName="_".join(strainList)
+            estimatedPloidy=len(strainList)
             result=pool.apply_async(runVariantCalling,[strainName,mappedShortReads,variantCalledShortReads,referenceFilePath,estimatedPloidy])
             results.append(result)
 
@@ -381,11 +378,14 @@ if __name__=="__main__":
 
         print("Variant calling over")
 
-        for strainName,estimatedPloidy in strainCouplings:
-            for subsamplingSize in strainDictionary["heterozygosityRates"]:
-                VCFFile=os.path.join(variantCalledShortReads,strainName+"_"+estimatedPloidy+"n.vcf")
-                subsampleVCF(VCFFile,subsamplingSize,True,referenceFilePath,benchmarkParameters["genomeSize"])
-                subsampleVCF(VCFFile,subsamplingSize,False,referenceFilePath,benchmarkParameters["genomeSize"])
+        for strainList in benchmarkParameters["strainLists"]:
+            for coverageLevel in benchmarkParameters["coverages"]:
+                strainName = "_".join(strainList)+"_"+coverageLevel+"X"
+                estimatedPloidy = str(len(strainList))
+                for subsamplingSize in benchmarkParameters["heterozygosityRates"]:
+                    VCFFile=os.path.join(variantCalledShortReads,strainName+"_"+estimatedPloidy+"n.vcf")
+                    subsampleVCF(VCFFile,subsamplingSize,True,referenceFilePath,benchmarkParameters["genomeSize"])
+                    subsampleVCF(VCFFile,subsamplingSize,False,referenceFilePath,benchmarkParameters["genomeSize"])
 
         print("Subsampling over")
 
