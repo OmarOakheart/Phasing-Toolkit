@@ -287,6 +287,9 @@ if __name__ == "__main__":
 
     #Prepare performance metrics file
     performanceMetricFile=performanceMetricPath+"timeAndMemoryMetrics.txt"
+    pFile = open(performanceMetricFile, "a")
+    pFile.write("#time (seconds)\tRSS (bytes)\tVMS (bytes)\ttoolName\ttestName\n")
+    pFile.close()
 
     threads=benchmarkParameters["threads"]
 
