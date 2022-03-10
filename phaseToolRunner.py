@@ -272,7 +272,7 @@ if __name__ == "__main__":
     if "flopp" in phasingMethods:
         floppPath = predictionPath + "flopp/"
         allPaths.append(floppPath)
-    if "nPhase" in phasingMethods:
+    if "nphase" in phasingMethods:
         nPhasePath=predictionPath+"nPhase/"
         allPaths.append(nPhasePath)
     if "whatshap-polyphase" in phasingMethods:
