@@ -185,13 +185,9 @@ def launchWhatshapPolyphase(ploidy,whatsHapPolyphaseParameter,outPath,referenceF
 
     outputLog = ""
 
-    ###########################################
-    #Add --include-haploid-sets when it works?#
-    ###########################################
-
     if indelBool==False:
         p = subprocess.Popen(["whatshap","polyphase","--ploidy",ploidy,"--ignore-read-groups","--block-cut-sensitivity",
-                              whatsHapPolyphaseParameter ,"-o",outPath,"--reference",referenceFilePath,"--threads",threads,
+                              whatsHapPolyphaseParameter ,"-o",outPath,"--reference",referenceFilePath,"--include-haploid-sets","--threads",threads,
                               vcfFile,mappedLR], stderr=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
         outputLog += "COMMAND: " + " ".join(["whatshap","polyphase","--ploidy",ploidy,"--ignore-read-groups","--block-cut-sensitivity",
                                              whatsHapPolyphaseParameter ,"-o",outPath,"--reference",referenceFilePath,"--include-haploid-sets","--threads",
@@ -199,7 +195,7 @@ def launchWhatshapPolyphase(ploidy,whatsHapPolyphaseParameter,outPath,referenceF
     else:
         p = subprocess.Popen(["whatshap", "polyphase", "--ploidy", ploidy, "--indels","--ignore-read-groups",
                               "--block-cut-sensitivity",whatsHapPolyphaseParameter, "-o", outPath, "--reference",
-                              referenceFilePath, "--threads", threads,vcfFile, mappedLR], stderr=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
+                              referenceFilePath,"--include-haploid-sets", "--threads", threads,vcfFile, mappedLR], stderr=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
         outputLog += "COMMAND: " + " ".join(["whatshap", "polyphase", "--ploidy", ploidy,"--indels", "--ignore-read-groups",
                                              "--block-cut-sensitivity",whatsHapPolyphaseParameter, "-o", outPath, "--reference",
                                              referenceFilePath,"--include-haploid-sets", "--threads",threads, vcfFile, mappedLR]) + "\n\n"
@@ -305,10 +301,10 @@ if __name__ == "__main__":
                     vcfFile=variantCalledShortReads+testName+".SNPs.vcf"
                     mappedLR = mappedLongReads + strainName + "_" + str(coverage) + "X.sorted.bam"
                     outPath = floppPath+"flopp_"+testName+".SNPs.vcf"
-                    launchFunction("flopp",["flopp", mappedLR, vcfFile, ploidy, outPath, threads,testName])
+                    launchFunction("flopp",[mappedLR, vcfFile, ploidy, outPath, threads,testName])
                     vcfFileWithIndels = variantCalledShortReads + testName + ".vcf"
                     outPath = floppPath + "flopp_" + testName + ".vcf"
-                    launchFunction("flopp", ["flopp", mappedLR, vcfFileWithIndels, ploidy, outPath, threads,testName+"_Indels"])
+                    launchFunction("flopp", [mappedLR, vcfFileWithIndels, ploidy, outPath, threads,testName+"_Indels"])
 
         print("Done with all flopp")
 
