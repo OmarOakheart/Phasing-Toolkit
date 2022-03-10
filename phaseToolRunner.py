@@ -239,7 +239,7 @@ def launchWhatshapPolyphase(ploidy,whatsHapPolyphaseParameter,outPath,referenceF
     stop = timeit.default_timer()
     totalRunTime = stop - start
     print("This took", totalRunTime / 60 / 60, "hours to run.")
-    performanceLine="\t".join([str(x) for x in [totalRunTime,maxRSS_mem,maxVMS_mem,"whatshap_polyphase_fixed",localStrainName]])+"\n"
+    performanceLine="\t".join([str(x) for x in [totalRunTime,maxRSS_mem,maxVMS_mem,"whatshap_polyphase",localStrainName]])+"\n"
     pFile=open(performanceMetricFile,"a")
     pFile.write(performanceLine)
     pFile.close()
@@ -322,14 +322,14 @@ if __name__ == "__main__":
                     testName = strainName + "_" + str(coverage) + "X_" + heterozygosityRate
                     vcfFile=variantCalledShortReads+testName+".SNPs.vcf"
                     mappedLR = mappedLongReads + strainName + "_" + str(coverage) + "X.sorted.bam"
-                    outPath = whatsHapPolyphasePath+"WHP_fixed_"+testName+".SNPs.vcf"
+                    outPath = whatsHapPolyphasePath+"WHP_"+testName+".SNPs.vcf"
                     whatsHapPolyphaseParameter = "4"
                     indelBool = False
                     launchFunction("whatshap Polyphase",[ploidy,whatsHapPolyphaseParameter,outPath,referenceFilePath,threads,vcfFile,
                                                          mappedLR,indelBool,testName])
                     vcfFileWithIndels = variantCalledShortReads + testName + ".vcf"
                     indelBool=True
-                    outPath = whatsHapPolyphasePath + "WHP_fixed_" + testName + ".vcf"
+                    outPath = whatsHapPolyphasePath + "WHP_" + testName + ".vcf"
                     launchFunction("whatshap Polyphase", [ploidy, whatsHapPolyphaseParameter, outPath, referenceFilePath, threads,
                                                           vcfFileWithIndels,mappedLR, indelBool,testName+"_Indels"])
 
