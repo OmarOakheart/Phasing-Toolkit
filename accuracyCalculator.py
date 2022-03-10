@@ -1,7 +1,6 @@
 import sys
 import os
 import random
-import glob
 
 def loadBenchmarkParameterFile(parameterFilePath):
     benchmarkParameters = {"mainPath": "",
@@ -233,7 +232,7 @@ def calculateAccuracyMetrics(groundTruthInfo,predictedInfo,testInfo,accuracyMetr
     resultTable=testInfo+[accuracyData["results"]["all"]["TP"],accuracyData["results"]["all"]["FP"],accuracyData["results"]["all"]["FN"],accuracyData["results"]["P90"],accuracyData["results"]["nHaplotigs"],accuracyData["results"]["nContigs"]]
     accuracyLine="\t".join([str(element) for element in resultTable])
     pFile = open(accuracyMetricFile, "a")
-    pFile.write(accuracyLine)
+    pFile.write(accuracyLine+"\n")
     pFile.close()
     print(accuracyLine)
 
@@ -299,9 +298,8 @@ def getBestMatch(predictedSNPs,groundTruthInfo):
             bestScoreDetail=(haplotypeName,TPScore,FPScore,commonPos)
     return bestScoreDetail
 
-def subsetTruePhases(groundTruthDict,subsetFile):
-    VCFPrefix = "/home/oabousaada/goldStandard/virtualPolyploids/Variants/shortReads/"
-    VCFInfo=loadVCFInformation(VCFPrefix+subsetFile)
+def subsetTruePhases(groundTruthDict,subsetFile,hybridVCFPrefix):
+    VCFInfo=loadVCFInformation(hybridVCFPrefix+subsetFile)
     subsetPositions=set()
     for chromosome, chromosomeData in VCFInfo.items():
         for SNPPosition in chromosomeData.keys():
@@ -330,9 +328,10 @@ if __name__ == "__main__":
     accuracyCalculationPath=mainPath+"accuracyCalculations/"
     WHPPrefix=mainPath+"/phasingPredictions/whatsHapPolyphase/"
     floppPrefix=mainPath+"/phasingPredictions/flopp/"
-    nPhasePrefix=mainPath+"/phasingPredictions/nPhase/*/Phased/"
+    nPhasePrefix=mainPath+"/phasingPredictions/nPhase/"
+    hybridVCFPrefix=mainPath+"/virtualPolyploids/Variants/shortReads/"
 
-    allPaths=[accuracyMetricPath]
+    allPaths=[accuracyMetricPath,accuracyCalculationPath]
 
     logPath=mainPath+"log/"
 
@@ -343,6 +342,10 @@ if __name__ == "__main__":
 
     fullLogPath=logPath+"phasingLog.txt"
     logText=""
+
+    pFile = open(accuracyMetricFile, "a")
+    pFile.write("#tool\tploidy\theterozygosity level (%)\tcoverage\tindelStatus\tTrue Positives (%)\tFalse Positives (%)\tmissing (%)\tP90\tnHaplotigs\tnContigs\n")
+    pFile.close()
 
     truePhaseDict={} #Will hold the ground truth of individual virtual strains
     allSubsets={} #Will hold the subset ground truth of individual virtual strains
@@ -356,10 +359,10 @@ if __name__ == "__main__":
         #So we want it to only consider the subsets
         for heterozygosityRate in benchmarkParameters["heterozygosityRates"]:
             for coverageLevel in benchmarkParameters["coverages"]:
-                subsetFileName=virtualStrainName+"_"+coverageLevel+"X_"+str(len(strainList))+"n_"+heterozygosityRate+".SNPs.vcf"
-                subsetFileNameIndels=virtualStrainName+"_"+coverageLevel+"X_"+str(len(strainList))+"n_"+heterozygosityRate+".vcf"
-                allSubsets[subsetFileName]=subsetTruePhases(truePhaseDict[virtualStrainName],subsetFileName)
-                allSubsets[subsetFileNameIndels]=subsetTruePhases(truePhaseDict[virtualStrainName],subsetFileNameIndels)
+                subsetFileName=virtualStrainName+"_"+coverageLevel+"X_"+heterozygosityRate+".SNPs.vcf"
+                subsetFileNameIndels=virtualStrainName+"_"+coverageLevel+"X_"+heterozygosityRate+".vcf"
+                allSubsets[subsetFileName]=subsetTruePhases(truePhaseDict[virtualStrainName],subsetFileName,hybridVCFPrefix)
+                allSubsets[subsetFileNameIndels]=subsetTruePhases(truePhaseDict[virtualStrainName],subsetFileNameIndels,hybridVCFPrefix)
 
     ################################################################
     #How to pre-process some results & load them in a usable format#
@@ -367,58 +370,82 @@ if __name__ == "__main__":
 
     if "whatshap-polyphase" in phasingMethods:
         #Translate WH-PP results
-        WHPFiles=glob.glob(WHPPrefix+"*.vcf")
-        for WHPFilePath in WHPFiles:
-            VCFFileName=WHPFilePath.split("/")[-1].replace("WHP_","")
-            phasingMethod="WHP-PP"
-            heterozygosityRate=VCFFileName.split("_")[-1].replace(".vcf","").replace(".SNPs","")
-            ploidy=VCFFileName.split("_")[-2]
-            coverage=VCFFileName.split("_")[-3]
-            if ".SNPs." in VCFFileName:
-                indelStatus="noIndels"
-            else:
-                indelStatus="Indels"
-            testInfo=[phasingMethod,ploidy,heterozygosityRate,coverage,indelStatus]
-            whatsHapPolyphaseResultTranslator(WHPFilePath, accuracyCalculationPath + "Translated_WHP_"+VCFFileName)
-            WHPPhasingResults=loadPhasingResults(accuracyCalculationPath+"Translated_WHP_"+VCFFileName)
-            calculateAccuracyMetrics(allSubsets[VCFFileName],WHPPhasingResults,testInfo,accuracyMetricFile)
+
+        for strainList in benchmarkParameters["strainLists"]:
+            virtualStrainName = "_".join(strainList)
+            for heterozygosityRate in benchmarkParameters["heterozygosityRates"]:
+                for coverage in benchmarkParameters["coverages"]:
+                    VCFFileName = virtualStrainName + "_" + coverage + "X_" + heterozygosityRate + ".SNPs.vcf"
+                    VCFFileNameIndels = virtualStrainName + "_" + coverage + "X_" + heterozygosityRate + ".vcf"
+                    phasingMethod="WHP-PP"
+                    ploidy=str(len(strainList))
+                    if ".SNPs." in VCFFileName:
+                        indelStatus="noIndels"
+                    else:
+                        indelStatus="Indels"
+                    #First no indels
+                    testInfo=[phasingMethod,ploidy,heterozygosityRate,coverage,"noIndels"]
+                    whatsHapPolyphaseResultTranslator(WHPPrefix+"WHP_"+VCFFileName, accuracyCalculationPath + "Translated_WHP_"+VCFFileName)
+                    WHPPhasingResults=loadPhasingResults(accuracyCalculationPath+"Translated_WHP_"+VCFFileName)
+                    calculateAccuracyMetrics(allSubsets[VCFFileName],WHPPhasingResults,testInfo,accuracyMetricFile)
+                    #Then with indels
+                    testInfo=[phasingMethod,ploidy,heterozygosityRate,coverage,"Indels"]
+                    whatsHapPolyphaseResultTranslator(WHPPrefix+"WHP_"+VCFFileNameIndels, accuracyCalculationPath + "Translated_WHP_"+VCFFileNameIndels)
+                    WHPPhasingResults=loadPhasingResults(accuracyCalculationPath+"Translated_WHP_"+VCFFileNameIndels)
+                    calculateAccuracyMetrics(allSubsets[VCFFileNameIndels],WHPPhasingResults,testInfo,accuracyMetricFile)
+
         print("Done calculating WhatsHap polyphase accuracy")
 
     if "flopp" in phasingMethods:
         #Translate all flopp results
-        floppFiles=glob.glob(floppPrefix+"*.vcf")
-        for floppFilePath in floppFiles:
-            VCFFileName=floppFilePath.split("\\")[-1].replace("flopp_","")
-            phasingMethod="flopp"
-            heterozygosityRate=VCFFileName.split("_")[-1].replace(".vcf","").replace(".SNPs","")
-            ploidy=VCFFileName.split("_")[-2]
-            coverage=VCFFileName.split("_")[-3]
-            if ".SNPs." in VCFFileName:
-                indelStatus="noIndels"
-            else:
-                indelStatus="Indels"
-            testInfo=[phasingMethod,ploidy,heterozygosityRate,coverage,indelStatus]
-            VCFInformation=loadVCFInformation(VCFPrefix+VCFFileName)
-            floppResultTranslator(floppFilePath,accuracyCalculationPath+"Translated_flopp_"+VCFFileName,VCFInformation)
-            floppPredictions=loadPhasingResults(accuracyCalculationPath+"Translated_flopp_"+VCFFileName)
-            calculateAccuracyMetrics(allSubsets[VCFFileName], floppPredictions,testInfo,accuracyMetricFile)
+        for strainList in benchmarkParameters["strainLists"]:
+            virtualStrainName = "_".join(strainList)
+            for heterozygosityRate in benchmarkParameters["heterozygosityRates"]:
+                for coverage in benchmarkParameters["coverages"]:
+                    VCFFileName = virtualStrainName + "_" + coverage + "X_" + heterozygosityRate + ".SNPs.vcf"
+                    VCFFileNameIndels = virtualStrainName + "_" + coverage + "X_" + heterozygosityRate + ".vcf"
+                    phasingMethod="flopp"
+                    ploidy=str(len(strainList))
+                    #First no indels
+                    testInfo=[phasingMethod,ploidy,heterozygosityRate,coverage,"noIndels"]
+                    VCFInformation=loadVCFInformation(hybridVCFPrefix+VCFFileName)
+                    floppResultTranslator(floppPrefix+"flopp_"+VCFFileName,accuracyCalculationPath+"Translated_flopp_"+VCFFileName,VCFInformation)
+                    floppPredictions=loadPhasingResults(accuracyCalculationPath+"Translated_flopp_"+VCFFileName)
+                    calculateAccuracyMetrics(allSubsets[VCFFileName], floppPredictions,testInfo,accuracyMetricFile)
+                    #Then with indels
+                    testInfo=[phasingMethod,ploidy,heterozygosityRate,coverage,"Indels"]
+                    VCFInformation=loadVCFInformation(hybridVCFPrefix+VCFFileNameIndels)
+                    floppResultTranslator(floppPrefix+"flopp_"+VCFFileNameIndels,accuracyCalculationPath+"Translated_flopp_"+VCFFileNameIndels,VCFInformation)
+                    floppPredictions=loadPhasingResults(accuracyCalculationPath+"Translated_flopp_"+VCFFileNameIndels)
+                    calculateAccuracyMetrics(allSubsets[VCFFileNameIndels], floppPredictions,testInfo,accuracyMetricFile)
         print("Done calculating flopp accuracy")
 
     if "nphase" in phasingMethods:
-        nPhaseFiles=glob.glob(nPhasePrefix+"*_variants.tsv")
-        for nPhaseFilePath in nPhaseFiles:
-            nPhasePhasingResults=loadPhasingResults(nPhaseFilePath)
-            VCFFileName=nPhaseFilePath.split("\\")[-1].replace("_0.1_0.01_0.05_0_variants.tsv",".SNPs.vcf").replace("_Indels.SNPs","")
-            phasingMethod="nPhase"
-            heterozygosityRate=VCFFileName.split("_")[-1].replace(".vcf","").replace(".SNPs","")
-            ploidy=VCFFileName.split("_")[-2]
-            coverage=VCFFileName.split("_")[-3]
-            if ".SNPs." in VCFFileName:
-                indelStatus="noIndels"
-            else:
-                indelStatus="Indels"
-            testInfo=[phasingMethod,ploidy,heterozygosityRate,coverage,indelStatus]
-            calculateAccuracyMetrics(allSubsets[VCFFileName],nPhasePhasingResults,testInfo,accuracyMetricFile)
+        nPhaseDefaultSuffix="_0.1_0.01_0.05_0_variants.tsv"
+        nPhaseDefaultSuffixIndel="_Indels_0.1_0.01_0.05_0_variants.tsv"
+        for strainList in benchmarkParameters["strainLists"]:
+            virtualStrainName = "_".join(strainList)
+            for heterozygosityRate in benchmarkParameters["heterozygosityRates"]:
+                for coverage in benchmarkParameters["coverages"]:
+                    exactTestName=virtualStrainName + "_" + coverage + "X_" + heterozygosityRate
+                    VCFFileName = exactTestName+nPhaseDefaultSuffix
+                    VCFFileNameIndels = exactTestName +nPhaseDefaultSuffixIndel
+                    phasingMethod="nPhase"
+                    ploidy=str(len(strainList))
+                    #Without indels
+                    testInfo=[phasingMethod,ploidy,heterozygosityRate,coverage,"noIndels"]
+                    nPhaseResultPath = nPhasePrefix + exactTestName+"/Phased/" + VCFFileName
+                    subsetFileName=exactTestName+".SNPs.vcf"
+                    nPhasePhasingResults = loadPhasingResults(nPhaseResultPath)
+                    calculateAccuracyMetrics(allSubsets[subsetFileName],nPhasePhasingResults,testInfo,accuracyMetricFile)
+                    #With indels
+                    testInfo=[phasingMethod,ploidy,heterozygosityRate,coverage,"Indels"]
+                    nPhaseIndelResultPath=nPhasePrefix+exactTestName+"_Indels/Phased/"+VCFFileNameIndels
+                    subsetFileNameIndels=exactTestName+".vcf"
+                    nPhasePhasingResults=loadPhasingResults(nPhaseIndelResultPath)
+                    calculateAccuracyMetrics(allSubsets[subsetFileNameIndels],nPhasePhasingResults,testInfo,accuracyMetricFile)
+
         print("Done calculating nPhase accuracy")
 
     print("Done calculating accuracy metrics")
+
