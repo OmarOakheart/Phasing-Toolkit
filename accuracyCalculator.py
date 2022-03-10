@@ -330,7 +330,7 @@ if __name__ == "__main__":
     accuracyCalculationPath=mainPath+"accuracyCalculations/"
     WHPPrefix=mainPath+"/phasingPredictions/whatsHapPolyphase/"
     floppPrefix=mainPath+"/phasingPredictions/flopp/"
-    nPhasePrefix=mainPath+"/phasingPredictions/nPhase/"
+    nPhasePrefix=mainPath+"/phasingPredictions/nPhase/*/Phased/"
 
     allPaths=[accuracyMetricPath]
 
@@ -422,7 +422,3 @@ if __name__ == "__main__":
         print("Done calculating nPhase accuracy")
 
     print("Done calculating accuracy metrics")
-
-
-
-
