@@ -135,6 +135,8 @@ If you're interested in helping with the development of this toolkit, please fee
 
 * Improve the flexibility of tools provided to make the phasing toolkit more versatile (for example reusing the VCF subsetting method to make it easy for anyone to subset their own VCF)
 * Include more default benchmarking datasets which push the limits of phasing methods in different ways (highly similar haplotypes, aneuploidy, LOH tracts, SVs...)
+* Develop tools which analyze SVs and phasing results in order to generate accurate haplotig sequences from a reference sequence
+* Develop tools to take phasing results and generate high-quality de novo phased sequences
 * Host a simple website which displays the results of different tools on different datasets
 * Test how different parameters influence accuracy results
 * Provide more insight into which variants are well-phased
